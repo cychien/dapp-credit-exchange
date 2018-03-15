@@ -1,0 +1,27 @@
+#searchRecordForm {
+    width: 60%;
+    margin: 30px auto 0px;
+}
+
+.dropdown {
+    margin-right: 20px;
+}
+
+#infoArea {
+    width: 80%;
+    margin: 60px auto 0px;
+}
+
+#record {
+    margin-top: 50px;
+}
+
+.button {
+    margin-right: 10px;
+}
+
+#addRecordForm {
+    width: 60%;
+    margin: 30px auto 0px 0px;
+}
+
