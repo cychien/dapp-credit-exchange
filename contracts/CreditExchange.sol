@@ -16,20 +16,12 @@ contract CreditExchange {
     mapping (string => Person) checkProviders;
     mapping (string => Person) moneyProviders;
 
-    function newPerson(string idCardNumber, string kind) public {
-        if (keccak256(kind) == keccak256("checkProviders")) {
-            require(checkProviders[idCardNumber].numCases == 0);
-            checkProviders[idCardNumber] = Person(0, 0);
-        } else if (keccak256(kind) == keccak256("moneyProviders")) {
-            require(moneyProviders[idCardNumber].numCases == 0);
-            moneyProviders[idCardNumber] = Person(0, 0);
-        } 
-    }
-
+    //新增信用記錄
     function addCase(string idCardNumber, string kind, bool isSuccessful, uint amount) public {
         Person storage person;
         
         if (keccak256(kind) == keccak256("checkProviders")) {
+            //如果這個person是新創的、以前沒有紀錄，還是可以取用的到，只是person的各欄位皆為預設值
             person = checkProviders[idCardNumber];
             if (isSuccessful == true)
                 person.numSuccessfulCases++;
@@ -42,6 +34,7 @@ contract CreditExchange {
         } 
     }
 
+    //查看信用記錄
     function getPerson(string idCardNumber, string kind) public view returns (uint, uint, bool[], uint[]) {
         Person storage person;
         bool[] memory isSuccessful;

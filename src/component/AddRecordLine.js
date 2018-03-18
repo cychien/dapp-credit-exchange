@@ -18,8 +18,31 @@ class AddRecordLine extends Component {
             result = false;
         this.props.isSuccessfulClickHandler(this.props.id, result);
     }
+    handleDeleteClick = () => {
+        this.props.deleteClickHandler(this.props.id);
+    }
 
     render() {
+        //根據當前isSuccessful的值決定button的外觀
+        const successButton = [
+            "button",
+            "is-success",
+            this.props.isSuccessful === null ? "is-outlined" : this.props.isSuccessful ? "" : "is-outlined"
+        ]
+        const failButton = [
+            "button",
+            "is-warning",
+            this.props.isSuccessful === null ? "is-outlined" : this.props.isSuccessful ? "is-outlined" : ""
+        ]
+
+        //如果是第0個(id === 0)就不顯示delete-icon
+        const deleteButton = [
+            "button",
+            "is-danger",
+            "delete-button",
+            this.props.id === 0 ? "invisible" : ""
+        ];
+
         return (
             <div className="field is-horizontal">
                 <div className="field-body">
@@ -53,18 +76,29 @@ class AddRecordLine extends Component {
                     </div>
                     <div className="btn">
                         <p className="control">
-                            <a className="button is-info" onClick={this.handleIssuccessfulClick}>
+                            <a className={successButton.join(" ").trim()} onClick={this.handleIssuccessfulClick}>
                                 成功
                             </a>
                         </p>
                     </div>
                     <div className="btn">
                         <p className="control">
-                            <a className="button is-info" onClick={this.handleIssuccessfulClick}>
+                            <a className={failButton.join(" ").trim()} onClick={this.handleIssuccessfulClick}>
                                 失敗
                             </a>
                         </p>
                     </div>
+
+                    <div className="btn">
+                        <p className="control">
+                            <a className={deleteButton.join(" ").trim()} onClick={this.handleDeleteClick}>
+                                <span className="icon is-medium">
+                                    <i className="fas fa-times"></i>
+                                </span>
+                            </a>
+                        </p>
+                    </div>
+
                 </div>
             </div>
         );

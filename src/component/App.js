@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Navbar from './Navbar';
 import AddRecordForm from './AddRecordForm';
 import SearchRecordForm from './SearchRecordForm';
+import '../css/main.css';
 
 class App extends Component {
     constructor(props) {

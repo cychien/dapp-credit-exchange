@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import creditExchangeContract from '../../build/contracts/CreditExchange.json';
 import getWeb3 from '../utils/getWeb3';
-import '../css/main.css';
 
 class SearchRecordForm extends Component {
     constructor(props) {
@@ -12,6 +11,7 @@ class SearchRecordForm extends Component {
             kind: "checkProviders",
             idCardNumber: "",
             isInfoDisplayed: false,
+            isMessageDisplayed: false,
             numCasesInInfo: 0,
             numSuccessfulCasesInInfo: 0,
             isSuccessfulInInfo: [],
@@ -56,19 +56,36 @@ class SearchRecordForm extends Component {
                 return creditExchangeInstance.getPerson.call(currentState.idCardNumber,
                     currentState.kind, { from: accounts[0] });
             }).then((result) => {
-                let amountArray = [];
-                for (let i = 0; i < result[3].length; i++) {
-                    amountArray[i] = result[3][i].c[0];
+
+                //如果擁有該idCardNumber的人還沒有任何記錄
+                if (result[0].c[0] === 0) {
+                    this.setState({
+                        isMessageDisplayed: true,
+                        isInfoDisplayed: false
+                    });
                 }
-                return this.setState({
-                    currentKind: this.state.kind,
-                    currentIdCardNumber: this.state.idCardNumber,
-                    isInfoDisplayed: true,
-                    numCasesInInfo: result[0].c[0],
-                    numSuccessfulCasesInInfo: result[1].c[0],
-                    isSuccessfulInInfo: result[2],
-                    amountInInfo: amountArray
-                });
+                //如果有找到紀錄
+                else {
+                    let amountArray = [];
+                    for (let i = 0; i < result[3].length; i++) {
+                        amountArray[i] = result[3][i].c[0];
+                    }
+                    let currentKind = '';
+                    if (this.state.kind === "checkProviders")
+                        currentKind = "支票提供者";
+                    else if (this.state.kind === "moneyProviders")
+                        currentKind = "投資者";
+                    return this.setState({
+                        currentKind: currentKind,
+                        currentIdCardNumber: this.state.idCardNumber,
+                        isInfoDisplayed: true,
+                        numCasesInInfo: result[0].c[0],
+                        numSuccessfulCasesInInfo: result[1].c[0],
+                        isSuccessfulInInfo: result[2],
+                        amountInInfo: amountArray,
+                        isMessageDisplayed: false
+                    });
+                }
             });
         })
 
@@ -76,7 +93,10 @@ class SearchRecordForm extends Component {
 
     render() {
         const infoAreaClassName = [
-            this.state.isInfoDisplayed ? "disappear" : ""
+            this.state.isInfoDisplayed ? "" : "disappear"
+        ];
+        const messageClassName = [
+            this.state.isMessageDisplayed ? "" : "disappear"
         ]
 
         let rows = [];
@@ -113,7 +133,7 @@ class SearchRecordForm extends Component {
                             </p>
                             <p className="control">
                                 <a className="button is-info" onClick={this.search}>
-                                    Search
+                                    查詢
                                 </a>
                             </p>
                         </div>
@@ -131,6 +151,7 @@ class SearchRecordForm extends Component {
                                 <p>身分證字號：{this.state.currentIdCardNumber}</p>
                                 <p>案件總數：{this.state.numCasesInInfo}</p>
                                 <p>成功案件數：{this.state.numSuccessfulCasesInInfo}</p>
+                                <p>成功率：{Math.round(this.state.numSuccessfulCasesInInfo / this.state.numCasesInInfo * 100) / 100}</p>
                             </div>
                         </div>
                     </nav>
@@ -142,6 +163,17 @@ class SearchRecordForm extends Component {
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <div className={messageClassName.join(" ").trim()} id="infoArea">
+                    <article className="message is-warning cannot-find-message">
+                        <div className="message-header">
+                            <p>訊息</p>
+                        </div>
+                        <div className="message-body">
+                            抱歉，查無此使用者的紀錄！
+                    </div>
+                    </article>
                 </div>
             </div>
         );

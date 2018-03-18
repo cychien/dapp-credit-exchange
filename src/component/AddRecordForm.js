@@ -33,30 +33,51 @@ class AddRecordForm extends Component {
             })
     }
 
+    //找尋該id的index
+    findIndex = (id) => {
+        for (let i = 0; i < this.state.records.length; i++) {
+            let record = this.state.records[i];
+            if (record.id === id)
+                return i;
+        }
+    }
+
     handleKindChange = (id, value) => {
         let currentUpdate = this.state.records;
-        currentUpdate[id].kind = value;
+        let index = this.findIndex(id);
+        currentUpdate[index].kind = value;
         this.setState({
             records: currentUpdate
         });
     }
     handleIdCardNumberChange = (id, value) => {
         let currentUpdate = this.state.records;
-        currentUpdate[id].idCardNumber = value;
+        let index = this.findIndex(id);
+        currentUpdate[index].idCardNumber = value;
         this.setState({
             records: currentUpdate
         });
     }
     handleAmountChange = (id, value) => {
         let currentUpdate = this.state.records;
-        currentUpdate[id].amount = value;
+        let index = this.findIndex(id);
+        currentUpdate[index].amount = value;
         this.setState({
             records: currentUpdate
         });
     }
     handleIssuccessfulClick = (id, value) => {
         let currentUpdate = this.state.records;
-        currentUpdate[id].isSuccessful = value;
+        let index = this.findIndex(id);
+        currentUpdate[index].isSuccessful = value;
+        this.setState({
+            records: currentUpdate
+        });
+    }
+    handleDeleteClick = (id) => {
+        let currentUpdate = this.state.records;
+        let index = this.findIndex(id);
+        currentUpdate.splice(index, 1)
         this.setState({
             records: currentUpdate
         });
@@ -70,7 +91,8 @@ class AddRecordForm extends Component {
                 idCardNumber: "",
                 amount: 0,
                 isSuccessful: null
-            }])
+            }]),
+            caseIndex: this.state.caseIndex + 1
         });
     }
     sendRecords = () => {
@@ -79,34 +101,28 @@ class AddRecordForm extends Component {
         creditExchange.setProvider(this.state.web3.currentProvider);
 
         var creditExchangeInstance;
-        var currentTime = new Date();
-        var formattedTime = currentTime.getFullYear() + "/" + (currentTime.getMonth() + 1)
-            + "/" + currentTime.getDate();
         var currentRecords = this.state.records;
 
         this.state.web3.eth.getAccounts((error, accounts) => {
+            //取得合約instance
             creditExchange.deployed().then((instance) => {
                 creditExchangeInstance = instance;
 
+                //使loop變成同步執行
                 return (function loop(i) {
                     if (i < currentRecords.length)
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
-                                creditExchangeInstance.newPerson(
+                                creditExchangeInstance.addCase(
                                     currentRecords[i].idCardNumber,
                                     currentRecords[i].kind,
+                                    currentRecords[i].isSuccessful,
+                                    currentRecords[i].amount,
                                     { from: accounts[0] }
-                                ).then((result) => {
-                                    creditExchangeInstance.addCase(
-                                        currentRecords[i].idCardNumber,
-                                        currentRecords[i].kind,
-                                        currentRecords[i].isSuccessful,
-                                        currentRecords[i].amount,
-                                        { from: accounts[0] }
-                                    );
-                                }).then((result) => {
-                                    resolve();
-                                });
+                                )
+                                    .then((result) => {
+                                        resolve();
+                                    });
                             }, 0);
                         }).then(loop.bind(null, i + 1));
                 })(0);
@@ -127,6 +143,27 @@ class AddRecordForm extends Component {
     }
 
     render() {
+        //檢查是否有非法的輸入(空值或amount欄位為0)
+        let isSendDisabled = false;
+        for (let i = 0; i < this.state.records.length; i++) {
+            let record = this.state.records[i];
+            if (record.idCardNumber === '' ||
+                Number.isInteger(Number(record.amount)) === false ||
+                Number(record.amount) === 0 ||
+                record.isSuccessful === null)
+                isSendDisabled = true;
+        }
+        //依照isSendDisabled的值決定要用哪一種button
+        let sendButton;
+        if (isSendDisabled)
+            sendButton = (
+                <a className="button disabled-button" disabled>送出</a>
+            );
+        else
+            sendButton = (
+                <a className="button is-link" onClick={this.sendRecords}>送出</a>
+            );
+
         return (
             <div className="container">
                 <div id="addRecordForm">
@@ -143,14 +180,15 @@ class AddRecordForm extends Component {
                                 idCardNumberChangeHandler={this.handleIdCardNumberChange}
                                 amountChangeHandler={this.handleAmountChange}
                                 isSuccessfulClickHandler={this.handleIssuccessfulClick}
+                                deleteClickHandler={this.handleDeleteClick}
                             />
                         ))
                     }
                 </div>
-                <div onClick={this.addChild}>
-                    新增一筆記錄
+                <div className="add-record" onClick={this.addChild}>
+                    新增記錄...
                 </div>
-                <button onClick={this.sendRecords}>送出</button>
+                {sendButton}
             </div>
         );
     }

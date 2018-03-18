@@ -25,3 +25,48 @@
     margin: 30px auto 0px 0px;
 }
 
+.disappear {
+    display: none;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.add-record {
+    width: 150px;
+    margin: 15px 0;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #838c91;
+}
+
+.add-record:hover {
+    background-color: #d6dadc; 
+    color: #4d4d4d;
+}
+
+.disabled-button {
+    background-color: #e9ebeb !important;
+    color: #828588 !important;
+    font-weight: bold;
+}
+
+.btn {
+    font-weight: bold;
+}
+
+.delete-button {
+    border-radius: 8px;
+    margin-left: 25px;
+}
+
+.cannot-find-message {
+    width: 70%;
+    margin: 30px auto 0px;
+}
+
+
+
+
